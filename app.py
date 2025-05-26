@@ -1,5 +1,5 @@
 import streamlit as st
-# import torch
+import torch
 import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
@@ -14,7 +14,7 @@ def load_model():
     model = models.resnet50(pretrained=False)
     model.fc = nn.Linear(model.fc.in_features, len(data_cat))
     model.load_state_dict(torch.load(
-        r"https://drive.google.com/file/d/1FNnocDlVS59JTZ7-7Lxuh2I3ScIzVR_p/view?usp=sharing",
+        r"C:\Users\ASUS\OneDrive\Desktop\deploy\resnet50_whale_classification.pth",
         map_location=torch.device('cpu')
     ))
     model.eval()
