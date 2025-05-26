@@ -13,7 +13,7 @@ data_cat = ['Fin Whale', 'Gray Whale', 'Humpback Whale', 'Southern Right Whale']
 
 # File path and Google Drive model link
 MODEL_PATH = r"C:\Users\ASUS\OneDrive\Desktop\deploy\resnet50_whale_classification.pth"
-GDRIVE_URL = "https://drive.google.com/file/d/1FNnocDlVS59JTZ7-7Lxuh2I3ScIzVR_p/view?usp=sharing"  # Replace with your actual FILE ID
+GDRIVE_URL = r"https://drive.google.com/file/d/1FNnocDlVS59JTZ7-7Lxuh2I3ScIzVR_p/view?usp=sharing"  # Replace with your actual FILE ID
 
 # Download model if not exists
 if not os.path.exists(MODEL_PATH):

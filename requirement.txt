@@ -1,8 +1,0 @@
-streamlit
-torch
-numpy
-pandas
-torchvision
-PIL
-gdown
-Pillow
