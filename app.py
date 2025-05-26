@@ -24,11 +24,15 @@ if not os.path.exists(MODEL_PATH):
 def load_model():
     model = models.resnet50(pretrained=False)
     model.fc = nn.Linear(model.fc.in_features, len(data_cat))
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+    
+    model.load_state_dict(torch.load(
+        MODEL_PATH,
+        map_location=torch.device('cpu'),
+        weights_only=False  # ← fix for PyTorch 2.6+
+    ))
+    
     model.eval()
     return model
-
-model = load_model()
 
 # Preprocessing
 transform = transforms.Compose([
