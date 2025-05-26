@@ -4,19 +4,27 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
 import numpy as np
-import time  # <-- Import time for simulating progress bar
+import time
+import os
+import gdown  # <-- For downloading from Google Drive
 
 # Class labels
 data_cat = ['Fin Whale', 'Gray Whale', 'Humpback Whale', 'Southern Right Whale']
+
+# File path and Google Drive model link
+MODEL_PATH = r"C:\Users\ASUS\OneDrive\Desktop\deploy\resnet50_whale_classification.pth"
+GDRIVE_URL = "https://drive.google.com/file/d/1FNnocDlVS59JTZ7-7Lxuh2I3ScIzVR_p/view?usp=sharing"  # Replace with your actual FILE ID
+
+# Download model if not exists
+if not os.path.exists(MODEL_PATH):
+    with st.spinner("📥 Downloading model file..."):
+        gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
 
 # Load model
 def load_model():
     model = models.resnet50(pretrained=False)
     model.fc = nn.Linear(model.fc.in_features, len(data_cat))
-    model.load_state_dict(torch.load(
-        r"C:\Users\ASUS\OneDrive\Desktop\deploy\resnet50_whale_classification.pth",
-        map_location=torch.device('cpu')
-    ))
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
     model.eval()
     return model
 
@@ -75,7 +83,7 @@ if uploaded_file is not None:
     my_bar = st.progress(0, text=progress_text)
 
     for percent_complete in range(0, 100, 10):
-        time.sleep(0.05)  # Sleep for animation effect
+        time.sleep(0.05)
         my_bar.progress(percent_complete + 10, text=progress_text)
     
     with torch.no_grad():
@@ -85,7 +93,7 @@ if uploaded_file is not None:
     predicted_label = data_cat[np.argmax(probs)]
     confidence = np.max(probs) * 100
 
-    my_bar.empty()  # Clear progress bar after completion
+    my_bar.empty()
 
     st.markdown("---")
     st.markdown(f"<h2 style='text-align: center;'>🔎 Prediction Result</h2>", unsafe_allow_html=True)
