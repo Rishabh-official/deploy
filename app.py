@@ -1,12 +1,30 @@
 import streamlit as st
-import torch
-import torch.nn as nn
-from torchvision import models, transforms
+import os
+import time
 from PIL import Image
 import numpy as np
-import time
-import os
+
+# Import PyTorch with error handling
+try:
+    import torch
+    import torch.nn as nn
+    from torchvision import models, transforms
+except ImportError as e:
+    st.error(f"PyTorch import error: {e}")
+    st.stop()
+
 import gdown
+
+# Configure Streamlit to avoid PyTorch conflicts
+st.set_page_config(
+    page_title="Whale Species Classifier",
+    page_icon="🐋",
+    layout="centered"
+)
+
+# Disable file watcher for PyTorch compatibility
+if 'model' not in st.session_state:
+    st.session_state.model = None
 
 # Class labels
 data_cat = ['Fin Whale', 'Gray Whale', 'Humpback Whale', 'Southern Right Whale']
@@ -16,20 +34,21 @@ MODEL_PATH = r"C:\Users\ASUS\OneDrive\Desktop\deploy\resnet50_whale_classificati
 # Fixed Google Drive URL format
 GDRIVE_URL = "https://drive.google.com/uc?id=1FNnocDlVS59JTZ7-7Lxuh2I3ScIzVR_p"
 
-# Load model function
-@st.cache_resource  # Cache the model to avoid reloading
+# Load model function with session state
 def load_model():
-    model = models.resnet50(pretrained=False)
-    model.fc = nn.Linear(model.fc.in_features, len(data_cat))
-    
-    model.load_state_dict(torch.load(
-        MODEL_PATH,
-        map_location=torch.device('cpu'),
-        weights_only=False
-    ))
-    
-    model.eval()
-    return model
+    if st.session_state.model is None:
+        model = models.resnet50(pretrained=False)
+        model.fc = nn.Linear(model.fc.in_features, len(data_cat))
+        
+        model.load_state_dict(torch.load(
+            MODEL_PATH,
+            map_location=torch.device('cpu'),
+            weights_only=False
+        ))
+        
+        model.eval()
+        st.session_state.model = model
+    return st.session_state.model
 
 # Preprocessing
 transform = transforms.Compose([
@@ -73,12 +92,29 @@ col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     st.markdown("<h3 style='text-align: center; color: #01579b;'>🏆 IEEE GRSS Student Grand Challenge</h3>", unsafe_allow_html=True)
     
-    # Display the IEEE GRSS logo (you'll need to save the image file in your project directory)
-    # For now, we'll use a placeholder - replace 'ieee_grss_logo.png' with your actual image path
-    try:
-        st.image("ieee_grss_logo.png", width=300, caption="IEEE GRSS Student Grand Challenge")
-    except:
-        st.info("📋 IEEE GRSS Student Grand Challenge - 4th Edition")
+    # Display the IEEE GRSS logo
+    # Check if logo exists and display it
+    logo_path = "ieee_grss_logo.png"
+    if os.path.exists(logo_path):
+        st.image(logo_path, width=400)
+    else:
+        # If local file doesn't exist, try different common paths
+        possible_paths = [
+            "./ieee_grss_logo.png",
+            "images/ieee_grss_logo.png", 
+            "assets/ieee_grss_logo.png"
+        ]
+        
+        logo_found = False
+        for path in possible_paths:
+            if os.path.exists(path):
+                st.image(path, width=400)
+                logo_found = True
+                break
+        
+        if not logo_found:
+            # Display a simple text placeholder
+            st.markdown("<h4 style='text-align: center; color: #01579b;'>📋 IEEE GRSS Student Grand Challenge - 4th Edition</h4>", unsafe_allow_html=True)
     
     st.markdown("""
     <div style='text-align: center; margin: 20px 0;'>
@@ -120,7 +156,7 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     
     st.markdown("<h5 style='text-align: center;'>Uploaded Image</h5>", unsafe_allow_html=True)
-    st.image(image, caption="Whale Detected", width=300, use_column_width=False)
+    st.image(image, caption="Beautiful Whale", width=300, use_column_width=False)
     
     input_tensor = transform(image).unsqueeze(0)
 
