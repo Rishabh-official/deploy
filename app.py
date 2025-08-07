@@ -30,9 +30,9 @@ if 'model' not in st.session_state:
 data_cat = ['Fin Whale', 'Gray Whale', 'Humpback Whale', 'Southern Right Whale']
 
 # File path and Google Drive model link
-MODEL_PATH = r"C:\Users\ASUS\OneDrive\Desktop\deploy\resnet50_whale_classification.pth"
-# Fixed Google Drive URL format
-GDRIVE_URL = "https://drive.google.com/uc?id=1FNnocDlVS59JTZ7-7Lxuh2I3ScIzVR_p"
+MODEL_PATH = r"C:\Users\ASUS\Downloads\resnet50_whale_classification.pth"  # Changed to relative path
+# Updated Google Drive URL - make sure your file has public sharing enabled
+GDRIVE_URL = "https://drive.google.com/file/d/1R_QFUS9yXN7r4IAEo4W9cwGzwIEZ_Dj5/view?usp=sharings"
 
 # Load model function with session state
 def load_model():
@@ -134,13 +134,61 @@ st.markdown("---")
 
 # Download model if not exists
 if not os.path.exists(MODEL_PATH):
-    with st.spinner("📥 Downloading model file..."):
-        try:
-            gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
-            st.success("Model downloaded successfully!")
-        except Exception as e:
-            st.error(f"Failed to download model: {str(e)}")
-            st.stop()
+    st.warning("⚠️ Model file not found. Please download it manually.")
+    
+    st.markdown("""
+    ### 📥 Manual Model Download Required
+    
+    **Step 1:** Click the download button below to get the model file:
+    """)
+    
+    # Create a download button that opens Google Drive
+    download_url = "https://drive.google.com/file/d/1FNnocDlVS59JTZ7-7Lxuh2I3ScIzVR_p/view?usp=sharing"
+    
+    st.markdown(f"""
+    <div style='text-align: center; margin: 20px 0;'>
+        <a href='{download_url}' target='_blank' 
+           style='background-color: #4285f4; color: white; padding: 15px 30px; 
+                  text-decoration: none; border-radius: 5px; font-weight: bold;
+                  font-size: 16px; display: inline-block;'>
+            📁 Download Model from Google Drive
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    **Step 2:** After downloading:
+    1. Rename the file to: `resnet50_whale_classification.pth`
+    2. Place it in the same folder as this Python script
+    3. Refresh this page (Ctrl+R or Cmd+R)
+    
+    **Expected file location:**
+    ```
+    your_project_folder/
+    ├── your_app.py
+    ├── resnet50_whale_classification.pth  ← Place file here
+    └── ieee_grss_logo.png (optional)
+    ```
+    
+    ---
+    """)
+    
+    # Option to upload the model file directly
+    st.markdown("### 🔄 Alternative: Upload Model File")
+    uploaded_model = st.file_uploader(
+        "Or upload the model file directly here:", 
+        type=["pth"], 
+        help="Upload the resnet50_whale_classification.pth file"
+    )
+    
+    if uploaded_model is not None:
+        # Save the uploaded model
+        with open(MODEL_PATH, "wb") as f:
+            f.write(uploaded_model.getbuffer())
+        st.success("✅ Model file uploaded successfully!")
+        st.rerun()  # Refresh the app
+    
+    st.stop()  # Stop execution until model is available
 
 # Load the model after ensuring it exists
 try:
